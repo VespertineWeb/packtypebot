@@ -9,14 +9,20 @@ Você deve criar 6 subdominios do tipo 'A' na Cloudflare
 > Portainer
 > 
 <p>portainer</p>
+<p>ex: portainer.seudominio.com
 <p>traefik</p>
+<p>ex: traefik.seudominio.com
 <p>edge</p>
+<p>ex: edge.seudominio.com
 
 > Typebot
 > 
-<p>builder</p>
-<p>viewer</p>
-<p>storage</p>
+<p>builder
+<p>ex: app.seudominio.com
+<p>viewer
+<p>ex: typebot.seudominio.com
+<p>storage
+<p>ex: storage.seudominio.com)
 
 
 <img src="https://packtypebot.com.br/wp-content/uploads/2023/12/apontamentos.png"> 
