@@ -191,25 +191,25 @@ EOL
     # prompting additional details for Typebot
     echo -e "\e[32mConfiguração do Typebot: \e[0m"
     echo ""
-    echo -e "\e[32mPasso \e[33m1/5\e[0m"
+    echo -e "\e[32mPasso \e[33m1/7\e[0m"
     read -p "Digite o Dominio para o Builder do Typebot (ex: app.seudominio.com): " typebot_builder_domain
     echo ""
-    echo -e "\e[32mPasso \e[33m2/5\e[0m"
+    echo -e "\e[32mPasso \e[33m2/7\e[0m"
     read -p "Digite o Dominio para o Viewer do Typebot (ex: typebot.seudominio.com): " typebot_viewer_domain
     echo ""
-    echo -e "\e[32mPasso \e[33m3/5\e[0m"
+    echo -e "\e[32mPasso \e[33m3/7\e[0m"
     read -p "Digite o Dominio para o Storage do Typebot (ex: storage.seudominio.com): " typebot_storage_domain
     echo ""
-    echo -e "\e[32mPasso \e[33m4/5\e[0m"
+    echo -e "\e[32mPasso \e[33m4/7\e[0m"
     read -p "Digite o SMTP Host (ex: smtp.gmail.com): " smtp_host
     echo ""
-    echo -e "\e[32mPasso \e[33m5/5\e[0m"
+    echo -e "\e[32mPasso \e[33m5/7\e[0m"
     read -p "Digite a porta SMTP do Email (ex: 587): " smtp_port
     echo ""
-    echo -e "\e[32mPasso \e[33m6/5\e[0m"
+    echo -e "\e[32mPasso \e[33m6/7\e[0m"
     read -p "Digite o Email para SMTP (ex: seuemail@gmail.com): " smtp_email
     echo ""
-    echo -e "\e[32mPasso \e[33m7/5\e[0m"
+    echo -e "\e[32mPasso \e[33m7/7\e[0m"
     read -p "Digite a Senha SMTP do Email (ex: minhasenha123@ ): " smtp_password
     echo ""
 
