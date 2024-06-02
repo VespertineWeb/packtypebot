@@ -1,4 +1,183 @@
+echo -e "\e[32m\e[0m"
+echo -e "\e[32m\e[0m"
+echo -e "\e[32m  _____        _____ _  __  _________     _______  ______ ____   ____ _______ \e[0m"
+echo -e "\e[32m |  __ \ /\   / ____| |/ / |__   __\ \   / /  __ \|  ____|  _ \ / __ \__   __|\e[0m"
+echo -e "\e[32m | |__) /  \ | |    | ' /     | |   \ \_/ /| |__) | |__  | |_) | |  | | | |   \e[0m"
+echo -e "\e[32m |  ___/ /\ \| |    |  <      | |    \   / |  ___/|  __| |  _ <| |  | | | |   \e[0m"
+echo -e "\e[32m | |  / ____ \ |____| . \     | |     | |  | |    | |____| |_) | |__| | | |   \e[0m"
+echo -e "\e[32m |_| /_/    \_\_____|_|\_\    |_|     |_|  |_|    |______|____/ \____/  |_|   \e[0m"
+echo -e "\e[32m\e[0m"
+echo -e "\e[32m\e[0m"
+
+# Prompt for email, traefik, senha, portainer, and edge variables
+echo -e "\e[32mPasso \e[33m1/5\e[0m"
+read -p "Endereço de e-mail: " email
+echo ""
+echo -e "\e[32mPasso \e[33m2/5\e[0m"
+read -p "Dominio do Traefik (ex: traefik.seudominio.com): " traefik
+echo ""
+echo -e "\e[32mPasso \e[33m3/5\e[0m"
+read -p "Senha do Traefik: " senha
+echo ""
+echo -e "\e[32mPasso \e[33m4/5\e[0m"
+read -p "Dominio do Portainer (ex: portainer.seudominio.com): " portainer
+echo ""
+echo -e "\e[32mPasso \e[33m5/5\e[0m"
+read -p "Dominio do Edge (ex: edge.seudominio.com): " edge
+echo ""
+
 #########################################################
+#
+# VERIFICAÇÃO DE DADOS
+#
+#########################################################
+
+clear
+
+echo ""
+echo "Seu E-mail: $email"
+echo "Dominio do Traefik: $traefik"
+echo "Senha do Traefik: $senha"
+echo "Dominio do Portainer: $portainer"
+echo "Dominio do Edge: $edge"
+echo ""
+echo ""
+read -p "As informações estão certas? (y/n): " confirma1
+if [ "$confirma1" == "y" ]; then
+
+  clear
+
+  #########################################################
+  #
+  # INSTALANDO DEPENDENCIAS
+  #
+  #########################################################
+
+  sudo apt update -y
+  sudo apt upgrade -y
+  sudo apt install curl
+
+  curl -fsSL https://get.docker.com -o get-docker.sh
+
+  sudo sh get-docker.sh
+
+  sleep 3
+
+  mkdir Portainer
+  cd Portainer
+
+  sleep 3
+
+  echo ""
+  echo ""
+  echo "Atualizado/Instalado com Sucesso"
+
+  sleep 3
+
+  clear
+
+  #########################################################
+  #
+  # CRIANDO DOCKER-COMPOSE.YML
+  #
+  #########################################################
+
+  sleep 3
+
+  # Create or modify docker-compose.yml file with subdomains
+  cat > docker-compose.yml <<EOL
+version: "3.3"
+services:
+  traefik:
+    container_name: traefik
+    image: "traefik:latest"
+    restart: always
+    command:
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --api.insecure=true
+      - --api.dashboard=true
+      - --providers.docker
+      - --log.level=ERROR
+      - --certificatesresolvers.leresolver.acme.httpchallenge=true
+      - --certificatesresolvers.leresolver.acme.email=$email
+      - --certificatesresolvers.leresolver.acme.storage=./acme.json
+      - --certificatesresolvers.leresolver.acme.httpchallenge.entrypoint=web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./acme.json:/acme.json"
+    labels:
+      - "traefik.http.routers.http-catchall.rule=hostregexp(\`{host:.+}\`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.traefik-dashboard.rule=Host(\`$traefik\`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=leresolver"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=$senha"
+      - "traefik.http.routers.traefik-dashboard.middlewares=traefik-auth"
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(\`$portainer\`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.services.frontend.loadbalancer.server.port=9000"
+      - "traefik.http.routers.frontend.service=frontend"
+      - "traefik.http.routers.frontend.tls.certresolver=leresolver"
+      - "traefik.http.routers.edge.rule=Host(\`$edge\`)"
+      - "traefik.http.routers.edge.entrypoints=websecure"
+      - "traefik.http.services.edge.loadbalancer.server.port=8000"
+      - "traefik.http.routers.edge.service=edge"
+      - "traefik.http.routers.edge.tls.certresolver=leresolver"
+volumes:
+  portainer_data:
+EOL
+
+  clear
+
+  ###############################################
+  #
+  # Certificates letsencrypt
+  #
+  ###############################################
+
+  echo ""
+  echo ""
+  echo "Instalando certificado letsencrypt"
+
+  touch acme.json
+
+  sudo chmod 600 acme.json
+
+  ###############################################
+  #
+  # INICIANDO CONTAINER
+  #
+  ###############################################
+
+  sudo docker compose up -d
+
+
+  echo -e "\e[32m\e[0m"
+  echo -e "\e[32mAcesse o Portainer através do link: https://$portainer\e[0m"
+  echo -e "\e[32m\e[0m"
+  echo -e "\e[32mAcesse o Traefik através do link: https://$traefik\e[0m"
+  echo -e "\e[32m\e[0m"
+  echo -e "\e[32mhttps://packtypebot.com.br\e[0m"
+  echo -e "\e[32m\e[0m"
+
+  #########################################################
   #
   # OPÇÃO DE INSTALAÇÃO DO TYPEBOT
   #
@@ -9,25 +188,25 @@
     # prompting additional details for Typebot
     echo -e "\e[32mConfiguração do Typebot: \e[0m"
     echo ""
-    echo -e "\e[32mPasso \e[33m1/7\e[0m"
+    echo -e "\e[32mPasso \e[33m1/5\e[0m"
     read -p "Dominio do Builder (ex: app.seudominio.com): " typebot_builder_domain
     echo ""
-    echo -e "\e[32mPasso \e[33m2/7\e[0m"
+    echo -e "\e[32mPasso \e[33m2/5\e[0m"
     read -p "Dominio do Viewer (ex: typebot.seudominio.com): " typebot_viewer_domain
     echo ""
-    echo -e "\e[32mPasso \e[33m3/7\e[0m"
+    echo -e "\e[32mPasso \e[33m3/5\e[0m"
     read -p "Dominio do Storage (ex: storage.seudominio.com): " typebot_storage_domain
     echo ""
-    echo -e "\e[32mPasso \e[33m4/7\e[0m"
+    echo -e "\e[32mPasso \e[33m4/5\e[0m"
     read -p "SMTP Host (ex: smtp.gmail.com): " smtp_host
     echo ""
-    echo -e "\e[32mPasso \e[33m5/7\e[0m"
+    echo -e "\e[32mPasso \e[33m5/5\e[0m"
     read -p "SMTP Porta (ex: 25, 587, 465, 2525): " smtp_port
     echo ""
-    echo -e "\e[32mPasso \e[33m6/7\e[0m"
+    echo -e "\e[32mPasso \e[33m6/5\e[0m"
     read -p "SMTP E-mail (ex: seuemail@gmail.com): " smtp_email
     echo ""
-    echo -e "\e[32mPasso \e[33m7/7\e[0m"
+    echo -e "\e[32mPasso \e[33m7/5\e[0m"
     read -p "SMTP Senha: " smtp_password
     echo ""
 
@@ -56,7 +235,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.typebot-builder.rule=Host(\`$typebot_builder_domain\`)"
-      - "traefik.http.routers.typebot-builder.entrypoints=websecure"
+      - "traefik.http.routers.typebot-builder.entrypoints=web,websecure"
       - "traefik.http.routers.typebot-builder.tls.certresolver=leresolver"
     environment:
       - DATABASE_URL=postgresql://postgres:typebot@typebot-db:5432/typebot
@@ -77,13 +256,16 @@ services:
       - S3_BUCKET=typebot
       - S3_ENDPOINT=$typebot_storage_domain   
 
+    networks:
+      - portainer_default
+
   typebot-viewer:
     image: baptistearno/typebot-viewer:latest
     restart: always
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.typebot-viewer.rule=Host(\`$typebot_viewer_domain\`)"
-      - "traefik.http.routers.typebot-viewer.entrypoints=websecure"
+      - "traefik.http.routers.typebot-viewer.entrypoints=web,websecure"
       - "traefik.http.routers.typebot-viewer.tls.certresolver=leresolver"
     environment:
       - DATABASE_URL=postgresql://postgres:typebot@typebot-db:5432/typebot
@@ -96,10 +278,14 @@ services:
       - S3_SECRET_KEY=minio123
       - S3_BUCKET=typebot
       - S3_ENDPOINT=$typebot_storage_domain
+    networks:
+      - portainer_default
 
   mail:
     image: bytemark/smtp
     restart: always
+    networks:
+      - portainer_default
 
   minio:
     image: minio/minio
@@ -108,13 +294,15 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.minio.rule=Host(\`$typebot_storage_domain\`)"
-      - "traefik.http.routers.minio.entrypoints=websecure"
+      - "traefik.http.routers.minio.entrypoints=web,websecure"
       - "traefik.http.routers.minio.tls.certresolver=leresolver"
     environment:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: minio123
     volumes:
       - typebot_s3_data:/data
+    networks:
+      - portainer_default
 
   createbuckets:
     image: minio/mc
@@ -128,34 +316,17 @@ services:
       /usr/bin/mc anonymous set public minio/typebot/public;
       exit 0;
       "
+    networks:
+      - portainer_default
 
 volumes:
   typebot_db_data:
   typebot_s3_data:
+
+networks:
+  portainer_default:
+    external: true
 EOL
-
-    # Submitting the stack to Portainer
-    read -p "Informe o usuário admin do Portainer: " portainer_user
-    read -sp "Informe a senha admin do Portainer: " portainer_pass
-    echo ""
-
-    PORTAINER_URL="http://localhost:9000/api"
-
-    STACK_NAME="Typebot"
-    ENDPOINT_ID=1
-
-    STACK_FILE_CONTENT=$(cat docker-compose-typebot.yml | sed ':a;N;$!ba;s/\n/\\n/g')
-
-    AUTH_TOKEN=$(curl -s -X POST -H "Content-Type: application/json" -d "{\"username\":\"$portainer_user\",\"password\":\"$portainer_pass\"}" $PORTAINER_URL/auth | jq -r .jwt)
-
-    if [ "$AUTH_TOKEN" == "null" ]; then
-      echo "Autenticação falhou. Verifique o usuário e a senha do Portainer."
-      exit 1
-    fi
-
-    curl -s -X POST -H "Authorization: Bearer $AUTH_TOKEN" -H "Content-Type: application/json" \
-    -d "{\"Name\":\"$STACK_NAME\",\"StackFileContent\":\"$STACK_FILE_CONTENT\",\"SwarmID\":\"\",\"EndpointID\":$ENDPOINT_ID, \"Env\":[]}" \
-    $PORTAINER_URL/stacks
 
     sudo docker compose -f docker-compose-typebot.yml up -d
 
@@ -164,7 +335,7 @@ EOL
     echo -e "\e[32m\e[0m"
     echo -e "\e[32mAcesse seu Typebot através do link: https://$typebot_builder_domain\e[0m"
   else
-    echo "Instalação do Typebot foi pulada."
+    echo "Instalação do Typebot foi pularida."
   fi
 
 #########################################################
