@@ -6,10 +6,8 @@ echo -e "\e[32m | |__) /  \ | |    | ' /     | |   \ \_/ /| |__) | |__  | |_) | 
 echo -e "\e[32m |  ___/ /\ \| |    |  <      | |    \   / |  ___/|  __| |  _ <| |  | | | |   \e[0m"
 echo -e "\e[32m | |  / ____ \ |____| . \     | |     | |  | |    | |____| |_) | |__| | | |   \e[0m"
 echo -e "\e[32m |_| /_/    \_\_____|_|\_\    |_|     |_|  |_|    |______|____/ \____/  |_|   \e[0m"
-echo -e "\e[32m                                                                              \e[0m"                                                                                                                                            
 echo -e "\e[32m\e[0m"
 echo -e "\e[32m\e[0m"
-
 
 # Prompt for email, traefik, senha, portainer, and edge variables
 echo -e "\e[32mPasso \e[33m1/5\e[0m"
@@ -57,7 +55,7 @@ if [ "$confirma1" == "y" ]; then
 
   sudo apt update -y
   sudo apt upgrade -y
-  sudo apt install -y curl
+  sudo apt install curl
 
   curl -fsSL https://get.docker.com -o get-docker.sh
 
@@ -88,7 +86,7 @@ if [ "$confirma1" == "y" ]; then
 
   # Create or modify docker-compose.yml file with subdomains
   cat > docker-compose.yml <<EOL
-version: "3.8"
+version: "3.3"
 services:
   traefik:
     container_name: traefik
@@ -112,7 +110,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "./acme.json:/acme.json"
     labels:
-      - "traefik.http.routers.http-catchall.rule=hostregexp({host:.+})"
+      - "traefik.http.routers.http-catchall.rule=hostregexp(\`{host:.+}\`)"
       - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
@@ -176,6 +174,8 @@ EOL
   echo -e "\e[32m\e[0m"
   echo -e "\e[32mAcesse o Traefik através do link: https://$traefik\e[0m"
   echo -e "\e[32m\e[0m"
+  echo -e "\e[32mhttps://packtypebot.com.br\e[0m"
+  echo -e "\e[32m\e[0m"
 
   #########################################################
   #
@@ -187,20 +187,34 @@ EOL
   if [ "$instala_typebot" == "y" ]; then
     # prompting additional details for Typebot
     echo -e "\e[32mConfiguração do Typebot: \e[0m"
+    echo ""
+    echo -e "\e[32mPasso \e[33m1/5\e[0m"
     read -p "Dominio do Builder (ex: app.seudominio.com): " typebot_builder_domain
+    echo ""
+    echo -e "\e[32mPasso \e[33m2/5\e[0m"
     read -p "Dominio do Viewer (ex: typebot.seudominio.com): " typebot_viewer_domain
+    echo ""
+    echo -e "\e[32mPasso \e[33m3/5\e[0m"
     read -p "Dominio do Storage (ex: storage.seudominio.com): " typebot_storage_domain
-
+    echo ""
+    echo -e "\e[32mPasso \e[33m4/5\e[0m"
     read -p "SMTP Host (ex: smtp.gmail.com): " smtp_host
+    echo ""
+    echo -e "\e[32mPasso \e[33m5/5\e[0m"
     read -p "SMTP Porta (ex: 25, 587, 465, 2525): " smtp_port
+    echo ""
+    echo -e "\e[32mPasso \e[33m6/5\e[0m"
     read -p "SMTP E-mail (ex: seuemail@gmail.com): " smtp_email
+    echo ""
+    echo -e "\e[32mPasso \e[33m7/5\e[0m"
     read -p "SMTP Senha: " smtp_password
+    echo ""
 
     # Generate a random ENCRYPTION_SECRET
     encryption_secret=$(openssl rand -hex 16)
 
     cat > docker-compose-typebot.yml <<EOL
-version: '3.8'
+version: '3.7'
 services:
   typebot-db:
     image: postgres:13
@@ -219,10 +233,10 @@ services:
     depends_on:
       - typebot-db
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.typebot-builder.rule=Host(\`$typebot_builder_domain\`)
-      - traefik.http.routers.typebot-builder.entrypoints=web,websecure
-      - traefik.http.routers.typebot-builder.tls.certresolver=leresolver
+      - "traefik.enable=true"
+      - "traefik.http.routers.typebot-builder.rule=Host(\`$typebot_builder_domain\`)"
+      - "traefik.http.routers.typebot-builder.entrypoints=web,websecure"
+      - "traefik.http.routers.typebot-builder.tls.certresolver=leresolver"
     environment:
       - DATABASE_URL=postgresql://postgres:typebot@typebot-db:5432/typebot
       - NEXTAUTH_URL=https://$typebot_builder_domain
@@ -240,7 +254,7 @@ services:
       - S3_ACCESS_KEY=minio
       - S3_SECRET_KEY=minio123
       - S3_BUCKET=typebot
-      - S3_ENDPOINT=https://$typebot_storage_domain   
+      - S3_ENDPOINT=$typebot_storage_domain   
 
     networks:
       - portainer_default
@@ -249,10 +263,10 @@ services:
     image: baptistearno/typebot-viewer:latest
     restart: always
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.typebot-viewer.rule=Host(\`$typebot_viewer_domain\`)
-      - traefik.http.routers.typebot-viewer.entrypoints=web,websecure
-      - traefik.http.routers.typebot-viewer.tls.certresolver=leresolver
+      - "traefik.enable=true"
+      - "traefik.http.routers.typebot-viewer.rule=Host(\`$typebot_viewer_domain\`)"
+      - "traefik.http.routers.typebot-viewer.entrypoints=web,websecure"
+      - "traefik.http.routers.typebot-viewer.tls.certresolver=leresolver"
     environment:
       - DATABASE_URL=postgresql://postgres:typebot@typebot-db:5432/typebot
       - NEXTAUTH_URL=https://$typebot_builder_domain
@@ -263,7 +277,7 @@ services:
       - S3_ACCESS_KEY=minio
       - S3_SECRET_KEY=minio123
       - S3_BUCKET=typebot
-      - S3_ENDPOINT=https://$typebot_storage_domain
+      - S3_ENDPOINT=$typebot_storage_domain
     networks:
       - portainer_default
 
@@ -278,10 +292,10 @@ services:
     restart: always
     command: server /data
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.minio.rule=Host(\`$typebot_storage_domain\`)
-      - traefik.http.routers.minio.entrypoints=web,websecure
-      - traefik.http.routers.minio.tls.certresolver=leresolver
+      - "traefik.enable=true"
+      - "traefik.http.routers.minio.rule=Host(\`$typebot_storage_domain\`)"
+      - "traefik.http.routers.minio.entrypoints=web,websecure"
+      - "traefik.http.routers.minio.tls.certresolver=leresolver"
     environment:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: minio123
@@ -318,118 +332,10 @@ EOL
 
     echo -e "\e[32m\e[0m"
     echo -e "\e[32mTypebot instalado com sucesso!\e[0m"
+    echo -e "\e[32m\e[0m"
     echo -e "\e[32mAcesse seu Typebot através do link: https://$typebot_builder_domain\e[0m"
-
   else
     echo "Instalação do Typebot foi pularida."
-  fi
-
-  #########################################################
-  #
-  # OPÇÃO DE INSTALAÇÃO DO EVOLUTION API
-  #
-  #########################################################
-
-  read -p "Deseja instalar o Evolution API? (y/n): " instala_evolution
-  if [ "$instala_evolution" == "y" ]; then
-    # Prompting additional details for Evolution API
-    read -p "Dominio da EvolutionAPI (ex: evolutionapi.seudominio.com): " evolution_api_domain
-
-    # Generate a random AUTHENTICATION_API_KEY
-    authentication_api_key=$(openssl rand -hex 16)
-
-    cat > docker-compose-evolution.yml <<EOL
-version: '3.8'
-
-services:
-  evolution_api:
-    image: atendai/evolution-api:latest
-    restart: always
-    volumes:
-      - evolution_instances:/evolution/instances
-      - evolution_store:/evolution/store
-      - evolution_manager:/evolution/Extras/appsmith
-      - evolution_views:/evolution/views
-    environment:
-      SERVER_URL: 'https://$evolution_api_domain'
-      CONFIG_SESSION_PHONE_CLIENT: PackTypebot
-      CONFIG_SESSION_PHONE_NAME: Chrome
-      AUTHENTICATION_TYPE: apikey
-      AUTHENTICATION_API_KEY: $authentication_api_key
-      AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: true
-      AUTHENTICATION_JWT_EXPIRIN_IN: 0
-      AUTHENTICATION_JWT_SECRET: 'L=0YWt]b2w[WF>#>:&E`'
-      STORE_MESSAGES: true
-      STORE_MESSAGE_UP: true
-      STORE_CONTACTS: true
-      STORE_CHATS: true
-      LOG_LEVEL: ERROR
-      CLEAN_STORE_CLEANING_INTERVAL: 7200
-      CLEAN_STORE_MESSAGES: true
-      CLEAN_STORE_MESSAGE_UP: true
-      CLEAN_STORE_CONTACTS: true
-      CLEAN_STORE_CHATS: true
-      WEBHOOK_GLOBAL_URL: ''
-      WEBHOOK_GLOBAL_ENABLED: false
-      WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS: false 
-      WEBHOOK_EVENTS_APPLICATION_STARTUP: false
-      WEBHOOK_EVENTS_QRCODE_UPDATED: true
-      WEBHOOK_EVENTS_MESSAGES_SET: true
-      WEBHOOK_EVENTS_MESSAGES_UPSERT: true
-      WEBHOOK_EVENTS_MESSAGES_UPDATE: true
-      WEBHOOK_EVENTS_MESSAGES_DELETE: true
-      WEBHOOK_EVENTS_SEND_MESSAGE: true
-      WEBHOOK_EVENTS_CONTACTS_SET: true
-      WEBHOOK_EVENTS_CONTACTS_UPSERT: true
-      WEBHOOK_EVENTS_CONTACTS_UPDATE: true
-      WEBHOOK_EVENTS_PRESENCE_UPDATE: true
-      WEBHOOK_EVENTS_CHATS_SET: true
-      WEBHOOK_EVENTS_CHATS_UPSERT: true
-      WEBHOOK_EVENTS_CHATS_UPDATE: true
-      WEBHOOK_EVENTS_CHATS_DELETE: true
-      WEBHOOK_EVENTS_GROUPS_UPSERT: true
-      WEBHOOK_EVENTS_GROUPS_UPDATE: true
-      WEBHOOK_EVENTS_GROUP_PARTICIPANTS_UPDATE: true
-      WEBHOOK_EVENTS_CONNECTION_UPDATE: true
-      WEBHOOK_EVENTS_CALL: true
-      WEBHOOK_EVENTS_NEW_JWT_TOKEN: false
-      WEBHOOK_EVENTS_TYPEBOT_START: false
-      WEBHOOK_EVENTS_TYPEBOT_CHANGE_STATUS: false
-      WEBHOOK_EVENTS_CHAMA_AI_ACTION: false
-      WEBHOOK_EVENTS_ERRORS: false
-      WEBHOOK_EVENTS_ERRORS_WEBHOOK:
-      QRCODE_LIMIT: 30
-      QRCODE_COLOR: #198754
-    labels:
-       - "traefik.enable=true"
-       - "traefik.http.routers.evolution_api.rule=Host(\`$evolution_api_domain\`)"
-       - "traefik.http.services.evolution_api.loadbalancer.server.port=8080"
-       - "traefik.http.routers.evolution_api.service=evolution_api"
-       - "traefik.http.routers.evolution_api.entrypoints=websecure"
-       - "traefik.http.routers.evolution_api.tls.certresolver=leresolver"
-
-    networks:
-        - portainer_default
-
-networks:
-  portainer_default:
-    external: true
-
-volumes:
-  evolution_instances:
-  evolution_store:
-  evolution_manager:
-  evolution_views:
-EOL
-
-    sudo docker compose -f docker-compose-evolution.yml up -d
-
-    echo -e "\e[32m\e[0m"
-    echo -e "\e[32mEvolution API instalado com sucesso!\e[0m"
-    echo -e "\e[32mAcesse sua EvolutionAPI através do link:: https://$evolution_api_domain\e[0m"
-    echo -e "\e[32mAPIKEY Global: $authentication_api_key\e[0m"
-  else
-    echo "Instalação do Evolution API foi pularida."
   fi
 
 #########################################################
