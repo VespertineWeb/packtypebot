@@ -55,7 +55,7 @@ if [ "$confirma1" == "y" ]; then
 
   sudo apt update -y
   sudo apt upgrade -y
-  sudo apt install curl
+  sudo apt install curl -y
 
   curl -fsSL https://get.docker.com -o get-docker.sh
 
@@ -168,7 +168,6 @@ EOL
 
   sudo docker compose up -d
 
-
   echo -e "\e[32m\e[0m"
   echo -e "\e[32mAcesse o Portainer através do link: https://$portainer\e[0m"
   echo -e "\e[32m\e[0m"
@@ -188,25 +187,25 @@ EOL
     # prompting additional details for Typebot
     echo -e "\e[32mConfiguração do Typebot: \e[0m"
     echo ""
-    echo -e "\e[32mPasso \e[33m1/5\e[0m"
+    echo -e "\e[32mPasso \e[33m1/7\e[0m"
     read -p "Dominio do Builder (ex: app.seudominio.com): " typebot_builder_domain
     echo ""
-    echo -e "\e[32mPasso \e[33m2/5\e[0m"
+    echo -e "\e[32mPasso \e[33m2/7\e[0m"
     read -p "Dominio do Viewer (ex: typebot.seudominio.com): " typebot_viewer_domain
     echo ""
-    echo -e "\e[32mPasso \e[33m3/5\e[0m"
+    echo -e "\e[32mPasso \e[33m3/7\e[0m"
     read -p "Dominio do Storage (ex: storage.seudominio.com): " typebot_storage_domain
     echo ""
-    echo -e "\e[32mPasso \e[33m4/5\e[0m"
+    echo -e "\e[32mPasso \e[33m4/7\e[0m"
     read -p "SMTP Host (ex: smtp.gmail.com): " smtp_host
     echo ""
-    echo -e "\e[32mPasso \e[33m5/5\e[0m"
+    echo -e "\e[32mPasso \e[33m5/7\e[0m"
     read -p "SMTP Porta (ex: 25, 587, 465, 2525): " smtp_port
     echo ""
-    echo -e "\e[32mPasso \e[33m6/5\e[0m"
+    echo -e "\e[32mPasso \e[33m6/7\e[0m"
     read -p "SMTP E-mail (ex: seuemail@gmail.com): " smtp_email
     echo ""
-    echo -e "\e[32mPasso \e[33m7/5\e[0m"
+    echo -e "\e[32mPasso \e[33m7/7\e[0m"
     read -p "SMTP Senha: " smtp_password
     echo ""
 
@@ -328,6 +327,16 @@ networks:
     external: true
 EOL
 
+    # Submitting the stack to Portainer
+    curl -sSL --unix-socket /var/run/docker.sock \
+      -H "Content-Type: application/json" \
+      -X POST -d @- <<_EOF_
+    {
+      "Name": "typebot-stack",
+      "StackFileContent": "$(cat docker-compose-typebot.yml)"
+    }
+_EOF_
+
     sudo docker compose -f docker-compose-typebot.yml up -d
 
     echo -e "\e[32m\e[0m"
@@ -335,7 +344,7 @@ EOL
     echo -e "\e[32m\e[0m"
     echo -e "\e[32mAcesse seu Typebot através do link: https://$typebot_builder_domain\e[0m"
   else
-    echo "Instalação do Typebot foi pularida."
+    echo "Instalação do Typebot foi pulada."
   fi
 
 #########################################################
