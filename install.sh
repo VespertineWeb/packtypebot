@@ -1,4 +1,3 @@
-#!/bin/bash
 echo -e "\e[32m\e[0m"
 echo -e "\e[32m\e[0m"
 echo -e "\e[32m                                                                       \e[0m"
@@ -9,7 +8,7 @@ echo -e "\e[32m |  ___/ /\ \| |    |  <      | |    \   / |  ___/|  __| |  _ <| 
 echo -e "\e[32m | |  / ____ \ |____| . \     | |     | |  | |    | |____| |_) | |__| | | |   \e[0m"
 echo -e "\e[32m |_| /_/    \_\_____|_|\_\    |_|     |_|  |_|    |______|____/ \____/  |_|   \e[0m"
 echo -e "\e[32m                                                                              \e[0m"                                                                                                                                            
-echo -e "\e[32mAuto Instalador Pack Typebot                                                  \e[0m"                                                           \e[0m"
+echo -e "\e[32mAuto Instalador Pack Typebot                                                  \e[0m"
 echo -e "\e[32m\e[0m"
 echo -e "\e[32m\e[0m"
 
