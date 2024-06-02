@@ -55,7 +55,7 @@ if [ "$confirma1" == "y" ]; then
 
   sudo apt update -y
   sudo apt upgrade -y
-  sudo apt install -y curl
+  sudo apt install curl
 
   curl -fsSL https://get.docker.com -o get-docker.sh
 
@@ -63,8 +63,8 @@ if [ "$confirma1" == "y" ]; then
 
   sleep 3
 
-  mkdir -p ~/Portainer
-  cd ~/Portainer
+  mkdir Portainer
+  cd Portainer
 
   sleep 3
 
@@ -228,7 +228,7 @@ services:
       - POSTGRES_DB=typebot
       - POSTGRES_PASSWORD=typebot
     networks:
-      - typebot_network
+      - portainer_default
 
   typebot-builder:
     image: baptistearno/typebot-builder:latest
@@ -243,7 +243,6 @@ services:
       - "traefik.http.services.typebot-builder.loadbalancer.server.port=3000"
       - "traefik.http.services.typebot-builder.loadbalancer.passHostHeader=true"
       - "traefik.http.routers.typebot-builder.service=typebot_builder"
-      - "io.portainer.stack=true"
     environment:
       - DATABASE_URL=postgresql://postgres:typebot@typebot-db:5432/typebot
       - NEXTAUTH_URL=https://$typebot_builder_domain
@@ -262,8 +261,9 @@ services:
       - S3_SECRET_KEY=minio123
       - S3_BUCKET=typebot
       - S3_ENDPOINT=$typebot_storage_domain   
+
     networks:
-      - typebot_network
+      - portainer_default
 
   typebot-viewer:
     image: baptistearno/typebot-viewer:latest
@@ -276,7 +276,6 @@ services:
       - "traefik.http.services.typebot-viewer.loadbalancer.server.port=3000"
       - "traefik.http.services.typebot-viewer.loadbalancer.passHostHeader=true"
       - "traefik.http.routers.typebot-viewer.service=typebot_viewer"
-      - "io.portainer.stack=true"
     environment:
       - DATABASE_URL=postgresql://postgres:typebot@typebot-db:5432/typebot
       - NEXTAUTH_URL=https://$typebot_builder_domain
@@ -289,13 +288,13 @@ services:
       - S3_BUCKET=typebot
       - S3_ENDPOINT=$typebot_storage_domain
     networks:
-      - typebot_network
+      - portainer_default
 
   mail:
     image: bytemark/smtp
     restart: always
     networks:
-      - typebot_network
+      - portainer_default
 
   minio:
     image: minio/minio
@@ -308,14 +307,13 @@ services:
       - "traefik.http.routers.minio.tls.certresolver=leresolver"
       - "traefik.http.services.minio.loadbalancer.passHostHeader=true"
       - "traefik.http.routers.minio.service=minio"
-      - "io.portainer.stack=true"
     environment:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: minio123
     volumes:
       - typebot_s3_data:/data
     networks:
-      - typebot_network
+      - portainer_default
 
   createbuckets:
     image: minio/mc
@@ -330,14 +328,15 @@ services:
       exit 0;
       "
     networks:
-      - typebot_network
+      - portainer_default
 
 volumes:
   typebot_db_data:
   typebot_s3_data:
 
 networks:
-  typebot_network:
+  portainer_default:
+    external: true
 EOL
 
     sudo docker compose -f docker-compose-typebot.yml up -d
@@ -347,7 +346,7 @@ EOL
     echo -e "\e[32m\e[0m"
     echo -e "\e[32mAcesse seu Typebot através do link: https://$typebot_builder_domain\e[0m"
   else
-    echo "Instalação do Typebot foi pulada."
+    echo "Instalação do Typebot foi pularida."
   fi
 
 #########################################################
