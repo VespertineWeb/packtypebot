@@ -240,9 +240,9 @@ services:
       - "traefik.http.routers.typebot-builder.rule=Host(\`$typebot_builder_domain\`)"
       - "traefik.http.routers.typebot-builder.entrypoints=web,websecure"
       - "traefik.http.routers.typebot-builder.tls.certresolver=leresolver"
-      - "traefik.http.services.typebot_builder.loadbalancer.server.port=3000"
-      - "traefik.http.services.typebot_builder.loadbalancer.passHostHeader=true"
-      - "traefik.http.routers.typebot_builder.service=typebot_builder"
+      - "traefik.http.services.typebot-builder.loadbalancer.server.port=3000"
+      - "traefik.http.services.typebot-builder.loadbalancer.passHostHeader=true"
+      - "traefik.http.routers.typebot-builder.service=typebot_builder"
     environment:
       - DATABASE_URL=postgresql://postgres:typebot@typebot-db:5432/typebot
       - NEXTAUTH_URL=https://$typebot_builder_domain
@@ -273,9 +273,9 @@ services:
       - "traefik.http.routers.typebot-viewer.rule=Host(\`$typebot_viewer_domain\`)"
       - "traefik.http.routers.typebot-viewer.entrypoints=web,websecure"
       - "traefik.http.routers.typebot-viewer.tls.certresolver=leresolver"
-      - "traefik.http.services.typebot_viewer.loadbalancer.server.port=3000"
-      - "traefik.http.services.typebot_viewer.loadbalancer.passHostHeader=true"
-      - "traefik.http.routers.typebot_viewer.service=typebot_viewer"
+      - "traefik.http.services.typebot-viewer.loadbalancer.server.port=3000"
+      - "traefik.http.services.typebot-viewer.loadbalancer.passHostHeader=true"
+      - "traefik.http.routers.typebot-viewer.service=typebot_viewer"
     environment:
       - DATABASE_URL=postgresql://postgres:typebot@typebot-db:5432/typebot
       - NEXTAUTH_URL=https://$typebot_builder_domain
