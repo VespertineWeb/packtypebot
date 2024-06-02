@@ -6,7 +6,7 @@
 Você deve criar 6 subdominios do tipo 'A' na Cloudflare
 *Status do Proxy deve esta desligado
 
-> Portainer
+## Portainer
 > 
 <p>portainer</p>
 <p>ex: portainer.seudominio.com
@@ -15,7 +15,7 @@ Você deve criar 6 subdominios do tipo 'A' na Cloudflare
 <p>edge</p>
 <p>ex: edge.seudominio.com
 
-> Typebot
+## Typebot
 > 
 <p>builder
 <p>ex: app.seudominio.com
@@ -24,8 +24,6 @@ Você deve criar 6 subdominios do tipo 'A' na Cloudflare
 <p>storage
 <p>ex: storage.seudominio.com)
 
-
-<img src="https://packtypebot.com.br/wp-content/uploads/2023/12/apontamentos.png"> 
 
 <a href="https://packtypebot.com.br/gerador/htpasswd.php">Gerador de Senha htpasswd</a>
 
