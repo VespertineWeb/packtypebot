@@ -183,31 +183,34 @@ EOL
   #
   #########################################################
 
+  echo -e "\e[32mINICIANDO A INSTALAÇÃO DO TYPEBOT \e[0m"
+  echo ""
+
   read -p "Deseja instalar o Typebot? (y/n): " instala_typebot
   if [ "$instala_typebot" == "y" ]; then
     # prompting additional details for Typebot
     echo -e "\e[32mConfiguração do Typebot: \e[0m"
     echo ""
     echo -e "\e[32mPasso \e[33m1/5\e[0m"
-    read -p "Dominio do Builder (ex: app.seudominio.com): " typebot_builder_domain
+    read -p "Digite o Dominio para o Builder do Typebot (ex: app.seudominio.com): " typebot_builder_domain
     echo ""
     echo -e "\e[32mPasso \e[33m2/5\e[0m"
-    read -p "Dominio do Viewer (ex: typebot.seudominio.com): " typebot_viewer_domain
+    read -p "Digite o Dominio para o Viewer do Typebot (ex: typebot.seudominio.com): " typebot_viewer_domain
     echo ""
     echo -e "\e[32mPasso \e[33m3/5\e[0m"
-    read -p "Dominio do Storage (ex: storage.seudominio.com): " typebot_storage_domain
+    read -p "Digite o Dominio para o Storage do Typebot (ex: storage.seudominio.com): " typebot_storage_domain
     echo ""
     echo -e "\e[32mPasso \e[33m4/5\e[0m"
-    read -p "SMTP Host (ex: smtp.gmail.com): " smtp_host
+    read -p "Digite o SMTP Host (ex: smtp.gmail.com): " smtp_host
     echo ""
     echo -e "\e[32mPasso \e[33m5/5\e[0m"
-    read -p "SMTP Porta (ex: 25, 587, 465, 2525): " smtp_port
+    read -p "Digite a porta SMTP do Email (ex: 587): " smtp_port
     echo ""
     echo -e "\e[32mPasso \e[33m6/5\e[0m"
-    read -p "SMTP E-mail (ex: seuemail@gmail.com): " smtp_email
+    read -p "Digite o Email para SMTP (ex: seuemail@gmail.com): " smtp_email
     echo ""
     echo -e "\e[32mPasso \e[33m7/5\e[0m"
-    read -p "SMTP Senha: " smtp_password
+    read -p "Digite a Senha SMTP do Email (ex: minhasenha123@ ): " smtp_password
     echo ""
 
     # Generate a random ENCRYPTION_SECRET
@@ -237,6 +240,9 @@ services:
       - "traefik.http.routers.typebot-builder.rule=Host(\`$typebot_builder_domain\`)"
       - "traefik.http.routers.typebot-builder.entrypoints=web,websecure"
       - "traefik.http.routers.typebot-builder.tls.certresolver=leresolver"
+      - "traefik.http.services.typebot_builder.loadbalancer.server.port=3000"
+      - "traefik.http.services.typebot_builder.loadbalancer.passHostHeader=true"
+      - "traefik.http.routers.typebot_builder.service=typebot_builder"
     environment:
       - DATABASE_URL=postgresql://postgres:typebot@typebot-db:5432/typebot
       - NEXTAUTH_URL=https://$typebot_builder_domain
@@ -267,6 +273,9 @@ services:
       - "traefik.http.routers.typebot-viewer.rule=Host(\`$typebot_viewer_domain\`)"
       - "traefik.http.routers.typebot-viewer.entrypoints=web,websecure"
       - "traefik.http.routers.typebot-viewer.tls.certresolver=leresolver"
+      - "traefik.http.services.typebot_viewer.loadbalancer.server.port=3000"
+      - "traefik.http.services.typebot_viewer.loadbalancer.passHostHeader=true"
+      - "traefik.http.routers.typebot_viewer.service=typebot_viewer"
     environment:
       - DATABASE_URL=postgresql://postgres:typebot@typebot-db:5432/typebot
       - NEXTAUTH_URL=https://$typebot_builder_domain
@@ -296,6 +305,8 @@ services:
       - "traefik.http.routers.minio.rule=Host(\`$typebot_storage_domain\`)"
       - "traefik.http.routers.minio.entrypoints=web,websecure"
       - "traefik.http.routers.minio.tls.certresolver=leresolver"
+      - "traefik.http.services.minio.loadbalancer.passHostHeader=true"
+      - "traefik.http.routers.minio.service=minio"
     environment:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: minio123
