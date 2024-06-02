@@ -7,10 +7,13 @@ Você deve criar 6 subdominios do tipo 'A' na Cloudflare
 *Status do Proxy deve esta desligado
 
 > Portainer
+> 
 <p>portainer</p>
 <p>traefik</p>
 <p>edge</p>
+
 > Typebot
+> 
 <p>builder</p>
 <p>viewer</p>
 <p>storage</p>
